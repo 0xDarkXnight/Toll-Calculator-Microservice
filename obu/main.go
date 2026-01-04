@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -47,15 +46,15 @@ func main() {
 				Lat:   lat,
 				Long:  long,
 			}
+			// sending obu data
 			if err := conn.WriteJSON(data); err != nil {
 				log.Fatal(err)
 			}
 		}
-		fmt.Println(genCoords())
 		time.Sleep(sendInterval)
 	}
 }
 
 func init() {
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 }
