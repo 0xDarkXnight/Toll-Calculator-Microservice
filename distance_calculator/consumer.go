@@ -1,18 +1,21 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
+	"github.com/0xDarkXnight/Toll-Calculator-Microservice/types"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/sirupsen/logrus"
 )
 
 type KafkaConsumer struct {
-	consumer  *kafka.Consumer
-	isRunning bool
+	consumer    *kafka.Consumer
+	isRunning   bool
+	calcService CaclulatorServicer
 }
 
-func NewKafkaConsumer(topic string) (*KafkaConsumer, error) {
+func NewKafkaConsumer(topic string, svc CaclulatorServicer) (*KafkaConsumer, error) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": "localhost",
 		"group.id":          "myGroup",
@@ -28,7 +31,8 @@ func NewKafkaConsumer(topic string) (*KafkaConsumer, error) {
 	}
 
 	return &KafkaConsumer{
-		consumer: c,
+		consumer:    c,
+		calcService: svc,
 	}, nil
 }
 
@@ -45,6 +49,14 @@ func (c *KafkaConsumer) readMessageLoop() {
 			logrus.Errorf("kafka consume error %s", err)
 			continue
 		}
-		fmt.Println(msg)
+		var data types.OBUData
+		if err := json.Unmarshal(msg.Value, &data); err != nil {
+			logrus.Errorf("JSON serialization error: %s", err)
+		}
+		distance, err := c.calcService.CalculateDistance(data)
+		if err != nil {
+			logrus.Errorf("calculation error: %s", &err)
+		}
+		fmt.Printf("distance %.2f\n", distance)
 	}
 }

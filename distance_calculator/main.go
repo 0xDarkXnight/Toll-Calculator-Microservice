@@ -1,11 +1,20 @@
 package main
 
-import "log"
+import (
+	"log"
+)
 
 const kafkaTopic = "obudata"
 
+// Transport (HTTP, GRPC, Kafka) -> attach business logic to this transport
+
 func main() {
-	kafkaConsumer, err := NewKafkaConsumer(kafkaTopic)
+	var (
+		err     error
+		service CaclulatorServicer
+	)
+	service = NewCalculatorService()
+	kafkaConsumer, err := NewKafkaConsumer(kafkaTopic, service)
 	if err != nil {
 		log.Fatal(err)
 	}
