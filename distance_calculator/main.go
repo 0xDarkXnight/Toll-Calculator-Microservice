@@ -14,6 +14,7 @@ func main() {
 		service CaclulatorServicer
 	)
 	service = NewCalculatorService()
+	service = NewLogMiddleware(service)
 	kafkaConsumer, err := NewKafkaConsumer(kafkaTopic, service)
 	if err != nil {
 		log.Fatal(err)
