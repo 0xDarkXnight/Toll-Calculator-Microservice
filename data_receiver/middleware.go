@@ -17,7 +17,7 @@ func NewLogMiddleware(next DataProducer) *LogMiddleware {
 	}
 }
 
-func (l *LogMiddleware) ProduceData(data types.OBUData) error {
+func (m *LogMiddleware) ProduceData(data types.OBUData) error {
 	defer func(start time.Time) {
 		logrus.WithFields(logrus.Fields{
 			"obuID": data.OBUID,
@@ -26,5 +26,5 @@ func (l *LogMiddleware) ProduceData(data types.OBUData) error {
 			"took":  time.Since(start),
 		}).Info("producing to kafka")
 	}(time.Now())
-	return l.next.ProduceData(data)
+	return m.next.ProduceData(data)
 }
